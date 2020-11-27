@@ -1,18 +1,20 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
   mode: 'production',
   entry: ['./src/main.js'],
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'js/main.js'
+    filename: 'js/main.js',
+    publicPath: './'
   },
   module: {
     rules: [
       {
-        test: /\.m?js$/,
+        test: /\.m?js$/i,
         include: [
           path.resolve(__dirname, 'src')
         ],
@@ -27,7 +29,7 @@ module.exports = {
         }
       },
       {
-        test: /\.vue$/,
+        test: /\.vue$/i,
         use: [
           {
             loader: 'vue-loader'
@@ -35,8 +37,24 @@ module.exports = {
         ]
       },
       {
-        test: /\.css$/,
-        use: ['css-loader']
+        test: /\.css$/i,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          { loader: 'css-loader' },
+        ]
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192
+            }
+          }
+        ]
       }
     ]
   },
@@ -50,8 +68,11 @@ module.exports = {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: './public/index.html',
-      publicPath: './'
     }),
-    new VueLoaderPlugin()
+    new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].[contenthash].css',
+      chunkFilename: 'css/chunk[id].[chunkhash].css'
+    }),
   ]
 }
