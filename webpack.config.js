@@ -2,14 +2,15 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 module.exports = {
   mode: 'production',
   entry: ['./src/main.js'],
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'js/main.js',
-    publicPath: './'
+    filename: 'js/[name].[contenthash:8].js',
+    publicPath: ''
   },
   module: {
     rules: [
@@ -39,19 +40,38 @@ module.exports = {
       {
         test: /\.css$/i,
         use: [
+          // {loader: 'style-loader'},
           {
             loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: '../'
+            }
           },
           { loader: 'css-loader' },
         ]
       },
       {
-        test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+        test: /\.(png|jpe?g|gif)$/i,
         use: [
           {
             loader: 'url-loader',
             options: {
-              limit: 8192
+              limit: 249856,
+              outputPath: 'images',
+              name: '[name]_[contenthash:8].[ext]'
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(eot|ttf|woff|woff2|svg)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 100,
+              outputPath: 'iconfont',
+              name: '[name]_[contenthash:8].[ext]'
             }
           }
         ]
@@ -65,14 +85,15 @@ module.exports = {
     }
   },
   plugins: [
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      filename: 'index.html',
       template: './public/index.html',
+      publicPath: './'
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: 'css/[name].[contenthash].css',
-      chunkFilename: 'css/chunk[id].[chunkhash].css'
+      chunkFilename: 'css/chunk[id].[chunkhash].css',
     }),
   ]
 }
